@@ -38,10 +38,20 @@ async function savePhotosData(photoList) {
     nunu = JSON.stringify(nunu)
     await fs.writeFile('photos.json', nunu)
 }
-
+/**
+ * Loads all user data from users.json.
+ * @async
+ * @returns {Promise<Object[]>} A promise that resolves to an array of user objects.
+ */
+async function loadUserData() {
+    let users = await fs.readFile("users.json", "utf8")
+    let result = JSON.parse(users)
+    return result
+}
 
 module.exports = {
     loadAlbumData,
     loadPhotosData,
     savePhotosData,
+    loadUserData
 }

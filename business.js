@@ -19,6 +19,15 @@ async function loadAlbum() {
 async function loadPhotos() {
     return persistence.loadPhotosData()
 }
+/**
+ * Loads all user data from persistence.
+ * @async
+ * @function
+ * @returns {Promise<Object[]>} A promise that resolves to an array of photo objects.
+ */
+async function loadUsers() {
+    return persistence.loadUserData()
+}
 
 /**
  * Saves all photo data to persistence.
@@ -29,6 +38,60 @@ async function loadPhotos() {
 async function savePhotos() {
     return persistence.savePhotosData()
 }
+/**
+ * Validates a user's login credentials.
+ * @async
+ * @function
+ * @param {string} username - The username entered by the user.
+ * @param {string} password - The password entered by the user.
+ * @returns {Promise<'success' | 'username' | 'password'>} 
+ *   - 'success' if username and password match a user record.
+ *   - 'username' if the username is not found.
+ *   - 'password' if the password is incorrect.
+ */
+async function loginValidation(username, password) {
+    let userData = await persistence.loadUserData()
+    for (let i of userData){
+        if (i.username === username){
+            if (i.password === password){
+                return 'success'
+            }
+            else{
+                return 'password'
+            }
+        }
+    }
+    return 'username'
+}
+/**
+ * Validates whether a given user has access to a specific photo.
+ * @async
+ * @function
+ * @param {number} photoId - The ID of the photo to check access for.
+ * @param {string} username - The username of the user requesting access.
+ * @returns {Promise<'valid' | null>} 
+ *   - 'valid' if the user owns the photo.
+ *   - null if the user does not own the photo or photo/user does not exist.
+ */
+async function photoAccessValidation(photoId, username) {
+    userData = await persistence.loadUserData()
+    photoData = await persistence.loadPhotosData()
+    for(let i of userData){
+        if (i.username === username){
+            for(let photo of photoData){
+                if(photoId===photo.id){
+                    if (photo.owner === i.id){
+                        return 'valid'
+                    }
+                    else{
+                        return null
+                    }
+                }
+            }
+        }
+    }
+}
+
 /**
  * Updates a photo's title and description, saving changes to the JSON file.
  * Empty strings mean the value is unchanged.
@@ -161,5 +224,8 @@ module.exports = {
     updatePhotoDetails,
     findPhoto,
     albumPhotoList,
-    addTagToPhoto
+    addTagToPhoto,
+    loadUsers,
+    loginValidation,
+    photoAccessValidation
 }
