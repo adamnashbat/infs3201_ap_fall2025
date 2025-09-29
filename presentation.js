@@ -32,18 +32,24 @@ async function updatePhotoPrompts(photoId) {
 async function userInterface(){
     let loginStatus=false
     let username
+    let attempts = 0
     while (loginStatus === false){
+        console.log("Type 'exit' to exit. ")
         username = prompt("Enter your username: ")
+        if (username.toLowerCase()==='exit'){
+            return
+        }
         let password = prompt("Enter your password: ")
         let login = await business.loginValidation(username, password)
         if (login === 'success'){
             loginStatus = true
         }
         else if(login === 'username'){
-            console.log("Invalid username.")
+            console.log(`User "${username}" does not exist.`)
         }
         else{
-            console.log("Invalid password.")
+            attempts += 1
+            console.log(`Incorrect password. Current # of login attempts: ${attempts}`)
         }
     }
     // The user interface main menu. The loop will keep going till the user enters the number 5 to exit.
