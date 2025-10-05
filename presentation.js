@@ -24,6 +24,16 @@ async function updatePhotoPrompts(photoId) {
     //If the function does not return during the for loop, it will come here, indicating no photo ID was found.
     return null
 }
+async function tagPhotoPrompts(photoId){
+    // Load data
+    let photoData = await business.loadPhotos()
+    for(let i of photoData){
+        if (i.id===photoId){
+            let tag = prompt(`What tag to add (${i.tags}, etc.): `)
+            return tag
+        }
+    }
+}
 /**
  * Main user interface loop. Displays the menu and handles user input (Errors as well).
  * @async
@@ -94,7 +104,7 @@ async function userInterface(){
         }
         else if (selection == 4) {
             let photo = Number(prompt("What photo ID to tag?: "))
-            let tag = prompt("What tag to add (caves, rock, explore, etc.)?: ")
+            let tag = await tagPhotoPrompts(photo)
             let result = await business.addTagToPhoto(photo, tag)
             if (result === null){
                 console.log("Photo not found.")
