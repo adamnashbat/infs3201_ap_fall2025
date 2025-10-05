@@ -1,57 +1,43 @@
-// Adam Nashbat, 60304819, INFS3201 Assignment 2
+// Adam Nashbat, 60304819, INFS3201 Assignment 3
 const fs = require('fs/promises')
-/**
- * Loads all album data from albums.json.
- * @async
- * @returns {Promise<Object[]>} A promise that resolves to an array of album objects.
- */
+const mongo = require('mongodb')
+
+let client
+let photoCollection
+let albumCollection
+
+async function connectDatabase() {
+  if (!client) {
+    client = new mongo.MongoClient('mongodb+srv://60304819:sixseven@s-60304819.1mdns.mongodb.net/')
+    await client.connect()
+    const db = client.db('infs3201_fall2025')
+    photoCollection = db.collection('photos')
+    albumCollection = db.collection('albums')
+  }
+  return client.db('infs3201_fall2025')
+}
 async function loadAlbumData() {
-    let albums = await fs.readFile("albums.json", "utf8")
-    let result = JSON.parse(albums)
-    return result
+  const db = await connectDatabase()
+  return db.collection('albums').find({}).toArray()
 }
 
-/**
- * Loads all photo data from photos.json.
- * @async
- * @returns {Promise<Object[]>} A promise that resolves to an array of photo objects.
- */
 async function loadPhotosData() {
-    let photos = await fs.readFile("photos.json", "utf8")
-    let result = JSON.parse(photos)
-    return result
+  const db = await connectDatabase()
+  return db.collection('photos').find({}).toArray()
 }
-// async function saveAlbumsData(albumList) {
-//     let nunu = albumList
-//     nunu = JSON.stringify(nunu)
-//     fs.writeFile('albums.json', nunu)
-// }
 
-/**
- * Saves the given photo list back to photos.json.
- * @async
- * @param {Object[]} photoList - The updated array of photo objects.
- * @returns {Promise<void>}
- */
 async function savePhotosData(photoList) {
-    let nunu = photoList
-    nunu = JSON.stringify(nunu)
-    await fs.writeFile('photos.json', nunu)
-}
-/**
- * Loads all user data from users.json.
- * @async
- * @returns {Promise<Object[]>} A promise that resolves to an array of user objects.
- */
-async function loadUserData() {
-    let users = await fs.readFile("users.json", "utf8")
-    let result = JSON.parse(users)
-    return result
+    await connectDatabase()
+    for (let photo of photoList) {
+        await photoCollection.updateOne(
+            { id: photo.id },
+            { $set: photo }
+        );
+    }
 }
 
 module.exports = {
     loadAlbumData,
     loadPhotosData,
-    savePhotosData,
-    loadUserData
+    savePhotosData
 }
