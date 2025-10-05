@@ -30,28 +30,6 @@ async function updatePhotoPrompts(photoId) {
  * @returns {Promise<void>}
  */
 async function userInterface(){
-    let loginStatus=false
-    let username
-    let attempts = 0
-    while (loginStatus === false){
-        console.log("Type 'exit' to exit. ")
-        username = prompt("Enter your username: ")
-        if (username.toLowerCase()==='exit'){
-            return
-        }
-        let password = prompt("Enter your password: ")
-        let login = await business.loginValidation(username, password)
-        if (login === 'success'){
-            loginStatus = true
-        }
-        else if(login === 'username'){
-            console.log(`User "${username}" does not exist.`)
-        }
-        else{
-            attempts += 1
-            console.log(`Incorrect password. Current # of login attempts: ${attempts}`)
-        }
-    }
     // The user interface main menu. The loop will keep going till the user enters the number 5 to exit.
     while (true) {
         console.log('<Photo Catalog>')
@@ -63,54 +41,42 @@ async function userInterface(){
         let selection = Number(prompt("Your selection> "))
         if (selection == 1) {
             let photo = Number(prompt("Photo ID?: "))
-            let access =  await business.photoAccessValidation(photo, username)
-            if (access === null){
-                console.log("You do not own any photos with this ID.")
+            let result = await business.findPhoto(photo)
+            if (result === 'empty'){
+                console.log("No photos")
+            }
+            else if (result === null){
+                console.log("Photo ID not found.")
             }
             else{
-                let result = await business.findPhoto(photo)
-                if (result === 'empty'){
-                    console.log("No photos")
-                }
-                else if (result === null){
-                    console.log("Photo ID not found.")
-                }
-                else{
-                    // The output of the findPhoto function is in a list, and then to print it I put it in a loop.
-                    // I made a list called order to print it like it was shown in the assignment.
-                    let order = ["File name", "Title", "Date", "Albums", "Tags"]
-                    for (let m = 0;m<result.length;m++){
-                        let i = result[m]
-                        // If it is an array, print each item seperated by a comma and space. If not, just print it as it is.
-                        if(Array.isArray(i)){ 
-                            console.log(`${order[m]}: ${i.join(", ")}`)
-                        }
-                        else{
-                            console.log(`${order[m]}: ${i}`)
-                        }
+                // The output of the findPhoto function is in a list, and then to print it I put it in a loop.
+                // I made a list called order to print it like it was shown in the assignment.
+                let order = ["File name", "Title", "Date", "Albums", "Tags"]
+                for (let m = 0;m<result.length;m++){
+                    let i = result[m]
+                    // If it is an array, print each item seperated by a comma and space. If not, just print it as it is.
+                    if(Array.isArray(i)){ 
+                        console.log(`${order[m]}: ${i.join(", ")}`)
+                    }
+                    else{
+                        console.log(`${order[m]}: ${i}`)
                     }
                 }
             }
-            }
+        }
             
         else if (selection == 2){
             let photo = Number(prompt("Photo ID?: "))
-            let access =  await business.photoAccessValidation(photo, username)
-            if (access === null){
-                console.log("You do not own any photos with this ID.")
+            // Made this function for the prompts specifically, as they needed data to be loaded so it can show the user what the current title/description is.
+            // I didn't want to load the data and do all the work in the user interface function, so I made its own function.
+            let promptValues = await updatePhotoPrompts(photo)
+            if (promptValues === null){
+                console.log("Photo ID not found.")
             }
             else{
-                // Made this function for the prompts specifically, as they needed data to be loaded so it can show the user what the current title/description is.
-                // I didn't want to load the data and do all the work in the user interface function, so I made its own function.
-                let promptValues = await updatePhotoPrompts(photo)
-                if (promptValues === null){
-                    console.log("Photo ID not found.")
-                }
-                else{
-                    // The actual editing of the file is done in this function.
-                    await business.updatePhotoDetails(photo,promptValues[0],promptValues[1])
-                    console.log("Photo Updated.")
-                }
+                // The actual editing of the file is done in this function.
+                await business.updatePhotoDetails(photo,promptValues[0],promptValues[1])
+                console.log("Photo Updated.")
             }
         }
         else if (selection == 3) {
@@ -128,23 +94,17 @@ async function userInterface(){
         }
         else if (selection == 4) {
             let photo = Number(prompt("What photo ID to tag?: "))
-            let access =  await business.photoAccessValidation(photo, username)
-            if (access === null){
-                console.log("You do not own any photos with this ID.")
+            let tag = prompt("What tag to add (caves, rock, explore, etc.)?: ")
+            let result = await business.addTagToPhoto(photo, tag)
+            if (result === null){
+                console.log("Photo not found.")
+            }
+            else if(result === 'exists'){
+                // Let the user know if the tag they put in already exists.
+                console.log("This tag already exists.")
             }
             else{
-                let tag = prompt("What tag to add (caves, rock, explore, etc.)?: ")
-                let result = await business.addTagToPhoto(photo, tag)
-                if (result === null){
-                    console.log("Photo not found.")
-                }
-                else if(result === 'exists'){
-                    // Let the user know if the tag they put in already exists.
-                    console.log("This tag already exists.")
-                }
-                else{
-                    console.log("Updated!")
-                }
+                console.log("Updated!")
             }
         }
             
