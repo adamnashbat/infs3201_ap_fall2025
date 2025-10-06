@@ -1,0 +1,7 @@
+<h1>Photos in {{album.name}} ({{count}} photos)</h1>
+<p>{{album.description}}</p>
+<ul>
+  {{#each albumPhotos}}
+    <li><a href="/photo/{{id}}">{{title}}</a></li>
+  {{/each}}
+</ul>
