@@ -22,7 +22,8 @@ app.get('/album/:id', async (req, res) => {
   const albums = await business.loadAlbum()
   const album = albums.find(a => a.id == albumId)
   if (!album){
-    return res.status(404).send('Album not found')
+    let msg = "Album not found."
+    return res.render('error', {msg, layout: undefined })
   }
   const photos = await business.loadPhotos()
   let albumPhotos = []
@@ -39,7 +40,8 @@ app.get('/photo/:id', async (req, res) => {
     const photos = await business.loadPhotos()
     const photo = photos.find(p => p.id == photoId)
     if (!photo){ 
-        return res.status(404).send("Photo not found")
+        let msg = "Photo not found."
+        return res.render('error', {msg, layout: undefined })
     }
     res.render('photo', {photo, layout: undefined })
 
@@ -50,7 +52,8 @@ app.get('/photo/:id/edit', async (req, res) => {
   const photo = photos.find(p => p.id === photoId)
 
   if (!photo) {
-    return res.status(404).send("Photo not found")
+    let msg = "Photo not found."
+    return res.render('error', {msg, layout: undefined })
   }
 
   res.render('photoEdit', { photo, layout: undefined })
@@ -63,7 +66,8 @@ app.post('/photo/:id/edit', async (req, res) => {
   const photo = photos.find(p => p.id == photoId)
 
   if (!photo) {
-    return res.status(404).send("Photo not found")
+    let msg = "Update failed"
+    return res.render('error', {msg, layout: undefined })
   }
   photo.title = title
   photo.description = description
