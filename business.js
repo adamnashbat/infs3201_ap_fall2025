@@ -7,7 +7,7 @@ const persistence = require("./persistence.js")
  * @returns {Promise<Object[]>} A promise that resolves to an array of album objects.
  */
 async function loadAlbum() {
-    return persistence.loadAlbumData()
+    return await persistence.loadAlbumData()
 }
 
 /**
@@ -17,7 +17,7 @@ async function loadAlbum() {
  * @returns {Promise<Object[]>} A promise that resolves to an array of photo objects.
  */
 async function loadPhotos() {
-    return persistence.loadPhotosData()
+    return await persistence.loadPhotosData()
 }
 /**
  * Loads all user data from persistence.
@@ -26,7 +26,7 @@ async function loadPhotos() {
  * @returns {Promise<Object[]>} A promise that resolves to an array of photo objects.
  */
 async function loadUsers() {
-    return persistence.loadUserData()
+    return await persistence.loadUserData()
 }
 
 /**
@@ -35,8 +35,8 @@ async function loadUsers() {
  * @function
  * @returns {Promise<void>} A promise that resolves when the data has been saved.
  */
-async function savePhotos() {
-    return persistence.savePhotosData()
+async function savePhotos(photoList) {
+    return await persistence.savePhotosData(photoList)
 }
 
 

@@ -1,0 +1,11 @@
+<h1>Edit Photo</h1>
+
+<form action="/photo/{{photo.id}}/edit" method="POST">
+  <label for="title">Title:</label><br>
+  <input type="text" id="title" name="title" value="{{photo.title}}" required><br><br>
+
+  <label for="description">Description:</label><br>
+  <textarea id="description" name="description" rows="4" cols="50" required>{{photo.description}}</textarea><br><br>
+
+  <button type="submit">Save</button>
+</form>

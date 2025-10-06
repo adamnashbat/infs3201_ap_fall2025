@@ -10,6 +10,7 @@ app.engine('hbs', exphbs.engine({ extname: '.hbs', defaultLayout: false }))
 app.set('view engine', 'hbs')
 app.set('views', path.join(__dirname, 'views'))
 app.use('/photos', express.static(path.join(__dirname, 'public/photos')))
+app.use(express.urlencoded({ extended: true }))
 let albums
 app.get('/', async (req, res) => {
   albums = await business.loadAlbum()
@@ -43,6 +44,35 @@ app.get('/photo/:id', async (req, res) => {
     res.render('photo', {photo, layout: undefined })
 
 })
+app.get('/photo/:id/edit', async (req, res) => {
+  const photoId = Number(req.params.id)
+  const photos = await business.loadPhotos()
+  const photo = photos.find(p => p.id === photoId)
+
+  if (!photo) {
+    return res.status(404).send("Photo not found")
+  }
+
+  res.render('photoEdit', { photo, layout: undefined })
+})
+app.post('/photo/:id/edit', async (req, res) => {
+  const photoId = Number(req.params.id)
+  const { title, description } = req.body
+
+  const photos = await business.loadPhotos()
+  const photo = photos.find(p => p.id == photoId)
+
+  if (!photo) {
+    return res.status(404).send("Photo not found")
+  }
+  photo.title = title
+  photo.description = description
+  await business.savePhotos(photos)
+
+  res.redirect(`/photo/${photoId}`)
+})
+
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`)
 })

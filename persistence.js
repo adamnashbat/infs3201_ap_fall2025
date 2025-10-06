@@ -32,7 +32,7 @@ async function savePhotosData(photoList) {
         await photoCollection.updateOne(
             { id: photo.id },
             { $set: photo }
-        );
+        )
     }
 }
 
