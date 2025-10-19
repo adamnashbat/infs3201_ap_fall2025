@@ -18,64 +18,47 @@ app.get('/', async (req, res) => {
 })
 
 app.get('/album/:id', async (req, res) => {
-  const albumId = req.params.id
-  const albums = await business.loadAlbum()
-  const album = albums.find(a => a.id == albumId)
-  if (!album){
-    let msg = "Album not found."
-    return res.render('error', {msg, layout: undefined })
+  const albumId = Number(req.params.id)
+  const album = await business.getAlbumById(albumId)
+  if (!album) {
+    return res.render('error', { msg: 'Album not found.', layout: undefined })
   }
-  const photos = await business.loadPhotos()
-  let albumPhotos = []
-  for (pic of photos){
-    if (pic.albums.includes(Number(albumId))){
-        albumPhotos.push(pic)
-    }
-  }
+  let albumPhotos = await business.albumPhotoList(albumId)
   let count = albumPhotos.length
-  res.render('album', {album, photos, albumPhotos, count, layout: undefined})
-})
-app.get('/photo/:id', async (req, res) => {
-    const photoId = req.params.id
-    const photos = await business.loadPhotos()
-    const photo = photos.find(p => p.id == photoId)
-    if (!photo){ 
-        let msg = "Photo not found."
-        return res.render('error', {msg, layout: undefined })
-    }
-    res.render('photo', {photo, layout: undefined })
-
-})
-app.get('/photo/:id/edit', async (req, res) => {
-  const photoId = Number(req.params.id)
-  const photos = await business.loadPhotos()
-  const photo = photos.find(p => p.id === photoId)
-
-  if (!photo) {
-    let msg = "Photo not found."
-    return res.render('error', {msg, layout: undefined })
+  let s = 's'
+  if (count === 1){
+    s = ''
   }
 
+  res.render('album', { album, albumPhotos, count, s, layout: undefined })
+});
+app.get('/photo/:id', async (req, res) => {
+  const photoId = Number(req.params.id)
+  const photo = await business.findPhoto(photoId)
+  if (!photo) {
+    return res.render('error', { msg: 'Photo not found.', layout: undefined })
+  }
+  res.render('photo', { photo, layout: undefined })
+})
+
+app.get('/edit', async (req, res) => {
+  const photoId = Number(req.query.pid)
+  const photo = await business.findPhoto(photoId)
+  if (!photo) {
+    return res.render('error', { msg: 'Photo not found.', layout: undefined })
+  }
   res.render('photoEdit', { photo, layout: undefined })
 })
-app.post('/photo/:id/edit', async (req, res) => {
-  const photoId = Number(req.params.id)
+
+app.post('/edit', async (req, res) => {
+  const photoId = Number(req.query.pid)
   const { title, description } = req.body
-
-  const photos = await business.loadPhotos()
-  const photo = photos.find(p => p.id == photoId)
-
+  const photo = await business.updatePhotoDetails(photoId, title, description)
   if (!photo) {
-    let msg = "Update failed"
-    return res.render('error', {msg, layout: undefined })
+    return res.render('error', { msg: 'Update failed', layout: undefined })
   }
-  photo.title = title
-  photo.description = description
-  await business.savePhotos(photos)
-
   res.redirect(`/photo/${photoId}`)
 })
-
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`)

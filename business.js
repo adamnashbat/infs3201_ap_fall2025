@@ -19,15 +19,6 @@ async function loadAlbum() {
 async function loadPhotos() {
     return await persistence.loadPhotosData()
 }
-/**
- * Loads all user data from persistence.
- * @async
- * @function
- * @returns {Promise<Object[]>} A promise that resolves to an array of photo objects.
- */
-async function loadUsers() {
-    return await persistence.loadUserData()
-}
 
 /**
  * Saves all photo data to persistence.
@@ -39,132 +30,90 @@ async function savePhotos(photoList) {
     return await persistence.savePhotosData(photoList)
 }
 
-
 /**
- * Updates a photo's title and description, saving changes to the JSON file.
- * Empty strings mean the value is unchanged.
+ * Updates the title and description of a specific photo.
  * @async
+ * @function
  * @param {number} photoId - The ID of the photo to update.
- * @param {string} title - The new title (or "" to keep existing).
- * @param {string} description - The new description (or "" to keep existing).
- * @returns {Promise<null | void>} Null if not found, otherwise nothing.
+ * @param {string} title - The new title for the photo.
+ * @param {string} description - The new description for the photo.
+ * @returns {Promise<Object|null>} The updated photo object, or null if the photo was not found.
  */
 async function updatePhotoDetails(photoId, title, description) {
-    // Load data
-    let photoData = await persistence.loadPhotosData()
-    for(let i of photoData){
-        if(i.id===photoId){
-            if (title!==""){ // If the users input is not empty, then change the title.
-                i.title = title
-            }
-            if (description!==""){ // Same deal here. If not empty, change.
-                i.description = description
-            }
-            await persistence.savePhotosData(photoData)
-            return
-        }
+  const photos = await loadPhotos()
+  let photo = null
+  for (let i of photos) {
+    if (i.id == photoId) {
+      photo = i
+      break
     }
+  }
+  if (!photo){
     return null
+  }
+  photo.title = title
+  photo.description = description
+  await savePhotos(photos)
+  return photo
 }
+
 /**
- * Finds a photo by its ID and returns its details.
+ * Finds and returns a photo by its ID.
  * @async
+ * @function
  * @param {number} photoId - The ID of the photo to find.
- * @returns {Promise<("empty" | null | Array)>} 
- *   "empty" if no photos exist, null if not found, or an array with 
- *   [filename, title, date, albumNames[], tags[]].
+ * @returns {Promise<Object|null>} The photo object if found, or null if not found.
  */
-async function findPhoto(photoId){
-    // Load data
-    let albumData = await persistence.loadAlbumData()
-    let photoData = await persistence.loadPhotosData()
-    if(photoData.length === 0){
-        //If there are somehow no photos, let the user know it is empty.
-        return "empty"
+async function findPhoto(photoId) {
+  const photos = await loadPhotos()
+  for (let i of photos) {
+    if (i.id == photoId) {
+      return i
     }
-    for(let i of photoData){
-        if(i.id === photoId){
-            let albumnames = []
-            for(let n of i.albums){ //The id's of the albums
-                for(let m of albumData){ //Iterate through each album
-                    if(n == m.id){ // Find a match for the album ID
-                        albumnames.push(m.name) //To display the name
-                    } 
-                }
-            }
-            // This is the method I used to convert the date to a readable one.
-            let dateString = i.date;
-            let date = new Date(dateString);
-            let options = { year: "numeric", month: "long", day: "numeric" };
-            let newDate = date.toLocaleDateString("en-US", options)
-            return [i.filename, i.title, newDate, albumnames, i.tags]
-        }
-    }
-    return null
+  }
+  return null
 }
+
 /**
- * Returns a CSV-like list of photos from an album.
+ * Retrieves an album by its ID.
  * @async
- * @param {string} albumName - The album name, not case sensitive.
- * @returns {Promise<string[] | null>} 
- *   An array of CSV lines (filename,resolution,tags) or null if album not found.
+ * @function
+ * @param {number} albumId - The ID of the album to retrieve.
+ * @returns {Promise<Object|null>} The album object if found, or null otherwise.
  */
-async function albumPhotoList(albumName){
-    // Load data
-    let albumData = await persistence.loadAlbumData()
-    let photoData = await persistence.loadPhotosData()
-    // Made an empty list that will be used later to hold each line, for each photo that is in the album.
-    let lines = []
-    for(let i of albumData){
-        if (i.name.toLowerCase() === albumName){
-            // Iterate through each photo
-            for(let photoInfo of photoData){
-                // Iterate through the albums array
-                for(let n of photoInfo.albums){
-                    if(n===i.id){
-                        let tags = photoInfo.tags.join(":") // Join each tag with a colon
-                        // Create a string which seperates each piece of data with a comma
-                        lines.push(`${photoInfo.filename},${photoInfo.resolution},${tags}`)
-                    }
-                }
-            }
-            return lines
-        }
+async function getAlbumById(albumId) {
+  const albums = await loadAlbum()
+  let album = null
+  for (let i of albums) {
+    if (i.id === albumId) {
+      album = i
+      break
     }
-    return null    
+  }
+  return album
 }
+
 /**
- * Adds a new tag to a photo if it does not already exist.
+ * Returns all photos that belong to a given album.
  * @async
- * @param {number} photoId - The ID of the photo to tag.
- * @param {string} newTag - The new tag to add.
- * @returns {Promise<"exists" | null | void>} 
- *   "exists" if tag already exists, null if photo not found, or nothing if added.
+ * @function
+ * @param {number} albumId - The ID of the album to retrieve photos for.
+ * @returns {Promise<Object[]>} An array of photo objects belonging to the album.
  */
-async function addTagToPhoto(photoId, newTag){
-    // Load data
-    let photoData = await persistence.loadPhotosData()
-    for(let i of photoData){
-        if(i.id === photoId){
-            for(let tag of i.tags){
-                // Made sure it is not case sensitive. For example, there's no point in having the tags "beach" and "Beach" both present.
-                if (tag.toLowerCase() === newTag.toLowerCase()){
-                    return 'exists'
-                }
-            }
-            if (newTag === ""){
-                // If the user just presses Enter, it will not add "" as a tag. It will just not add anything, similar to the photo updating function.
-                return
-            }
-            else{
-                i.tags.push(newTag)
-                await persistence.savePhotosData(photoData)
-                return
-            }
-        }
+async function albumPhotoList(albumId) {
+  const photos = await loadPhotos()
+  let albumPhotos = []
+  for (let i of photos) {
+    for (let a of i.albums) {
+      if (a === albumId) {
+        albumPhotos.push(i)
+        break;
+      }
     }
-    return null
+  }
+  return albumPhotos
 }
+
 module.exports = {
     loadAlbum,
     loadPhotos,
@@ -172,6 +121,5 @@ module.exports = {
     updatePhotoDetails,
     findPhoto,
     albumPhotoList,
-    addTagToPhoto,
-    loadUsers
+    getAlbumById
 }

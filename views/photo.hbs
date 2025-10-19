@@ -2,4 +2,4 @@
 <p>Title: {{photo.title}}</p>
 <p>Description: {{photo.description}}</p>
 <img src="/photos/{{photo.filename}}" style="max-width: 300px;" alt="{{photo.title}}">
-<p><a href="/photo/{{photo.id}}/edit">Edit</a></p>
+<p><a href="/edit?pid={{photo.id}}" method="post">Edit</a></p>
