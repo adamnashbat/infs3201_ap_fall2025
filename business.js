@@ -117,10 +117,12 @@ async function albumPhotoList(albumId) {
 
 async function checkLogin(username, password) {
     let user = await persistence.getUserDetails(username)
-    if(user!==null && user.username===username && user.password===password){
-        return [true, user.accounttype]
+    let hashedPassword = crypto.createHash('sha256').update(password).digest('hex')
+    console.log(hashedPassword)
+    if(user!==null && user.username===username && user.password===hashedPassword){
+        return true
     }
-    return [undefined, undefined]
+    return undefined
 }
 
 async function startSession(data) {
@@ -129,7 +131,7 @@ async function startSession(data) {
     let sessionData = {
       sessionKey,
       expiry,
-      data,
+      data:data,
     }
     await persistence.saveSession(sessionData.sessionKey, sessionData.expiry, sessionData.data)
   
@@ -146,6 +148,40 @@ async function deleteSession(key) {
     return await persistence.deleteSession(key)
 }
 
+async function addUser(username, password, firstName, lastName, email){
+  let users = await persistence.loadUserData()
+  for(let i of users){
+    if (i.username==username || i.email==email){
+      return false
+    }
+  }
+
+  let id;
+  let unique = false;
+  while (!unique) {
+    id = Math.floor(Math.random() * 1000000);
+    unique = true
+    for (let i = 0; i < users.length; i++) {
+      if (users[i].id === id) {
+        unique = false
+        break
+      }
+    }
+  }
+  let hashedPassword = crypto.createHash('sha256').update(password).digest('hex')
+
+  let newUser = {
+    id,
+    username,
+    password : hashedPassword,
+    firstName,
+    lastName,
+    email
+  }
+  users.push(newUser)
+  await persistence.saveUserData(users)
+  return true
+}
 
 module.exports = {
     loadAlbum,
@@ -158,5 +194,6 @@ module.exports = {
     startSession,
     getSessionData,
     deleteSession,
-    checkLogin
+    checkLogin,
+    addUser
 }

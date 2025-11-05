@@ -23,15 +23,34 @@ app.get('/', (req, res) => {
 app.post('/', async (req,res) => {
     let username = req.body.username
     let password = req.body.password
-    let [valid,accounttype] = await business.checkLogin(username, password)
+    let valid = await business.checkLogin(username, password)
     if (valid){
-        let sessionData = await business.startSession({ username: username, accounttype:accounttype})
+        let sessionData = await business.startSession({username: username})
         res.cookie('sessionkey', sessionData.sessionKey, {expires:sessionData.expiry})
         res.redirect('/album-list')
     }
     else{
         res.redirect('/?message=Failed to log in - invalid credentials.')
     }
+})
+app.get('/register', async(req, res)=>{
+  res.render('register', {layout:undefined, message: req.query.message})
+})
+app.post('/register', async(req, res)=>{
+  let username = req.body.username
+  let password = req.body.password
+  let firstName = req.body.firstName
+  let lastName = req.body.lastName
+  let email = req.body.email
+  let added = await business.addUser(username, password, firstName, lastName, email)
+  if(!added){
+    res.redirect('/register?message=Username or email already used.')
+    return
+  }
+  let sessionData = await business.startSession({username: username})
+  res.cookie('sessionkey', sessionData.sessionKey, {expires:sessionData.expiry})
+  res.redirect('/album-list?message=Successfully created account. Welcome!')
+
 })
 app.get('/logout', async (req, res) => {
   let sessionKey = req.cookies.sessionkey
@@ -52,7 +71,7 @@ app.get('/album-list', async (req,res)=>{
     return res.redirect("/?message=Session expired")
   }
   let albums= await business.loadAlbum()
-  res.render('albumList', {albums, layout:undefined})
+  res.render('albumList', {message:req.query.message, albums, layout:undefined})
 })
 
 app.get('/album/:id', async (req, res) => {
