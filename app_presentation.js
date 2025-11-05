@@ -1,7 +1,10 @@
 const express = require('express')
 const exphbs = require('express-handlebars')
 const path = require('path')
+const cookieParser = require('cookie-parser')
+const crypto = require('crypto')
 const business = require('./business.js')
+const bodyParser = require('body-parser')
 
 const app = express()
 const port = 8000
@@ -11,10 +14,45 @@ app.set('view engine', 'hbs')
 app.set('views', path.join(__dirname, 'views'))
 app.use('/photos', express.static(path.join(__dirname, 'public/photos')))
 app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
+app.use(bodyParser.urlencoded())
 let albums
-app.get('/', async (req, res) => {
-  albums = await business.loadAlbum()
-  res.render('albumList', { albums, layout: undefined })
+app.get('/', (req, res) => {
+    res.render('login', {layout: undefined, message: req.query.message})
+})
+app.post('/', async (req,res) => {
+    let username = req.body.username
+    let password = req.body.password
+    let [valid,accounttype] = await business.checkLogin(username, password)
+    if (valid){
+        let sessionData = await business.startSession({ username: username, accounttype:accounttype})
+        res.cookie('sessionkey', sessionData.sessionKey, {expires:sessionData.expiry})
+        res.redirect('/album-list')
+    }
+    else{
+        res.redirect('/?message=Failed to log in - invalid credentials.')
+    }
+})
+app.get('/logout', async (req, res) => {
+  let sessionKey = req.cookies.sessionkey
+  console.log(sessionKey)
+  if (sessionKey) {
+    await business.deleteSession(sessionKey)
+    res.clearCookie('sessionkey')
+  }
+  res.redirect('/')
+})
+app.get('/album-list', async (req,res)=>{
+  let sessionKey = req.cookies.sessionkey
+  if (!sessionKey) {
+        return res.redirect("/?message=No session found. Please log in.")
+  }
+  const session = await business.getSessionData(sessionKey)
+  if (!session) {
+    return res.redirect("/?message=Session expired")
+  }
+  let albums= await business.loadAlbum()
+  res.render('albumList', {albums, layout:undefined})
 })
 
 app.get('/album/:id', async (req, res) => {

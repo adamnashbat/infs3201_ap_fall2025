@@ -1,5 +1,6 @@
 // Adam Nashbat, 60304819, INFS3201 Assignment 2
 const persistence = require("./persistence.js")
+const crypto = require('crypto')
 /**
  * Loads all album data from persistence.
  * @async
@@ -114,6 +115,38 @@ async function albumPhotoList(albumId) {
   return albumPhotos
 }
 
+async function checkLogin(username, password) {
+    let user = await persistence.getUserDetails(username)
+    if(user!==null && user.username===username && user.password===password){
+        return [true, user.accounttype]
+    }
+    return [undefined, undefined]
+}
+
+async function startSession(data) {
+    let sessionKey = crypto.randomUUID()
+    let expiry = new Date(Date.now() + 5 * 60 * 1000 )
+    let sessionData = {
+      sessionKey,
+      expiry,
+      data,
+    }
+    await persistence.saveSession(sessionData.sessionKey, sessionData.expiry, sessionData.data)
+  
+    return sessionData
+}
+
+async function getSessionData(key) {
+    return await persistence.getSessionData(key)
+}
+  
+
+
+async function deleteSession(key) {
+    return await persistence.deleteSession(key)
+}
+
+
 module.exports = {
     loadAlbum,
     loadPhotos,
@@ -121,5 +154,9 @@ module.exports = {
     updatePhotoDetails,
     findPhoto,
     albumPhotoList,
-    getAlbumById
+    getAlbumById,
+    startSession,
+    getSessionData,
+    deleteSession,
+    checkLogin
 }
