@@ -26,6 +26,11 @@ async function loadPhotosData() {
   return db.collection('photos').find({}).toArray()
 }
 
+async function loadUserData() {
+  const db = await connectDatabase()
+  return db.collection('users').find({}).toArray()
+}
+
 async function savePhotosData(photoList) {
     await connectDatabase()
     for (let photo of photoList) {
@@ -36,8 +41,13 @@ async function savePhotosData(photoList) {
     }
 }
 
+
+
+
+
 module.exports = {
     loadAlbumData,
     loadPhotosData,
-    savePhotosData
+    savePhotosData,
+    loadUserData
 }
