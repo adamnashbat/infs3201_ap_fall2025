@@ -1,3 +1,7 @@
 <h1>There has been an error.</h1>
-<p>{{msg}}</p>
-<button onclick="window.history.back()">Go Back</button>
+<p>
+  {{#if msg}}{{msg}}{{else}}{{message}}{{/if}}
+</p>
+<p>
+  <a href="/album-list">Back to albums</a> | <a href="/">Login</a>
+</p>

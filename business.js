@@ -40,7 +40,7 @@ async function savePhotos(photoList) {
  * @param {string} description - The new description for the photo.
  * @returns {Promise<Object|null>} The updated photo object, or null if the photo was not found.
  */
-async function updatePhotoDetails(photoId, title, description) {
+async function updatePhotoDetails(photoId, title, description, visibility) {
   const photos = await loadPhotos()
   let photo = null
   for (let i of photos) {
@@ -54,8 +54,60 @@ async function updatePhotoDetails(photoId, title, description) {
   }
   photo.title = title
   photo.description = description
+  if (visibility == 'public' || visibility == 'private'){
+    photo.visibility = visibility
+  }
   await savePhotos(photos)
   return photo
+}
+
+async function canViewPhoto(username,photo) {
+  if(photo.visibility === 'public'){
+    return true
+  }
+  return photo.ownerUsername === username
+  
+}
+
+async function canEditPhoto(username,photo) {
+  return photo.ownerUsername === username
+  
+}
+
+async function albumPhotoListVisibleToUser(albumId, username) {
+  const photos= await loadPhotos()
+  let out = []
+  let targetId = Number(albumId)
+  for(let i of photos){
+    let inAlbum = false
+    for(let a of i.albums){
+      if(Number(a)===targetId){
+        inAlbum = true 
+        break
+      }
+    }
+    if (!inAlbum){
+      continue
+    }
+    let visible = await canViewPhoto(username,i)
+    if(visible){
+      out.push(i)
+    }
+  }
+  return out
+}
+
+async function addComment(photoId,username,commentText) {
+  return await persistence.addComment({
+    id: Date.now(),
+    photoId:photoId,
+    username:username,
+    text:commentText,
+    createdAt:new Date()
+  })
+}
+async function getCommentsByPhoto(photoId) {
+  return await persistence.getCommentByPhoto(photoId)
 }
 
 /**
@@ -122,7 +174,7 @@ async function checkLogin(username, password) {
     if(user!==null && user.username===username && user.password===hashedPassword){
         return true
     }
-    return undefined
+    return false
 }
 
 async function startSession(data) {
@@ -195,5 +247,10 @@ module.exports = {
     getSessionData,
     deleteSession,
     checkLogin,
-    addUser
+    addUser,
+    canViewPhoto,
+    canEditPhoto,
+    albumPhotoListVisibleToUser,
+    addComment,
+    getCommentsByPhoto
 }

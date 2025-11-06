@@ -2,4 +2,22 @@
 <p>Title: {{photo.title}}</p>
 <p>Description: {{photo.description}}</p>
 <img src="/photos/{{photo.filename}}" style="max-width: 300px;" alt="{{photo.title}}">
+<h3>Comments</h3>
+{{#if comments}}
+  <ul>
+    {{#each comments}}
+      <li><strong>{{this.username}}:</strong> {{this.text}}</li>
+    {{/each}}
+  </ul>
+{{else}}
+  <p>No comments yet.</p>
+{{/if}}
+<form method="post" action="/photo/{{photo.id}}/comment">
+  <textarea name="text" rows="3" cols="40"></textarea>
+  <button type="submit">Post Comment</button>
+</form>
 <p><a href="/edit?pid={{photo.id}}" method="post">Edit</a></p>
+<br>
+<p>
+  <a href="/album-list">Back to Albums</a> | <a href="/logout">Logout</a>
+</p>

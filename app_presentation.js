@@ -16,7 +16,22 @@ app.use('/photos', express.static(path.join(__dirname, 'public/photos')))
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(bodyParser.urlencoded())
-let albums
+let album
+
+async function requireLogin(req,res,next){
+  const sessionKey = req.cookies.sessionkey
+  if(!sessionKey){
+    return res.redirect('/?message=No session found. Please log in.')
+  }
+  const session = await business.getSessionData(sessionKey)
+  if(!session){
+    return res.redirect('/?message= Session Expired')
+  }
+  req.username = session.data.username
+  next()
+}
+
+
 app.get('/', (req, res) => {
     res.render('login', {layout: undefined, message: req.query.message})
 })
@@ -61,7 +76,7 @@ app.get('/logout', async (req, res) => {
   }
   res.redirect('/')
 })
-app.get('/album-list', async (req,res)=>{
+app.get('/album-list', requireLogin, async (req,res)=>{
   let sessionKey = req.cookies.sessionkey
   if (!sessionKey) {
         return res.redirect("/?message=No session found. Please log in.")
@@ -74,13 +89,13 @@ app.get('/album-list', async (req,res)=>{
   res.render('albumList', {message:req.query.message, albums, layout:undefined})
 })
 
-app.get('/album/:id', async (req, res) => {
+app.get('/album/:id', requireLogin, async (req, res) => {
   const albumId = Number(req.params.id)
   const album = await business.getAlbumById(albumId)
   if (!album) {
     return res.render('error', { msg: 'Album not found.', layout: undefined })
   }
-  let albumPhotos = await business.albumPhotoList(albumId)
+  let albumPhotos = await business.albumPhotoListVisibleToUser(albumId,req.username)
   let count = albumPhotos.length
   let s = 's'
   if (count === 1){
@@ -88,17 +103,51 @@ app.get('/album/:id', async (req, res) => {
   }
 
   res.render('album', { album, albumPhotos, count, s, layout: undefined })
-});
-app.get('/photo/:id', async (req, res) => {
+})
+app.get('/photo/:id', requireLogin, async (req, res) => {
   const photoId = Number(req.params.id)
   const photo = await business.findPhoto(photoId)
   if (!photo) {
     return res.render('error', { msg: 'Photo not found.', layout: undefined })
   }
-  res.render('photo', { photo, layout: undefined })
+  const canView = await business.canViewPhoto(req.username, photo)
+  if (!canView) {
+    return res.render('error', { msg: 'You do not have access to this photo.', layout: undefined })
+  }
+
+  const comments = await business.getCommentsByPhoto(photoId)
+  res.render('photo', { photo, comments, layout: undefined })
 })
 
-app.get('/edit', async (req, res) => {
+app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
+  let photoId = Number(req.params.id)
+  let text = req.body.text
+  let photo = await business.findPhoto(photoId)
+  let canView = await business.canViewPhoto(req.username,photo)
+  if(!canView){
+    return res.render('error',{layout:undefined,msg:'You do not have access to this photo.'})
+  }
+  if(!text||text.trim() === ''){
+    let comments = await business.getCommentsByPhoto(photoId)
+    return res.render('photo', {
+      layout:undefined,
+      photo,
+      comments,
+      message:'comment cannot be empty'
+    }
+    )
+  }
+  await business.addComment(photoId,req.username,text.trim())
+  let comments = await business.getCommentsByPhoto(photoId)
+  res.render('photo',{
+    layout:undefined,
+    photo,
+    comments,
+    message: 'comment added'
+  })
+})
+
+app.get('/edit', requireLogin, async (req, res) => {
   const photoId = Number(req.query.pid)
   const photo = await business.findPhoto(photoId)
   if (!photo) {
@@ -107,10 +156,11 @@ app.get('/edit', async (req, res) => {
   res.render('photoEdit', { photo, layout: undefined })
 })
 
-app.post('/edit', async (req, res) => {
+app.post('/edit', requireLogin, async (req, res) => {
   const photoId = Number(req.query.pid)
   const { title, description } = req.body
-  const photo = await business.updatePhotoDetails(photoId, title, description)
+  const visibility = req.body.visibility
+  const photo = await business.updatePhotoDetails(photoId, title, description, visibility)
   if (!photo) {
     return res.render('error', { msg: 'Update failed', layout: undefined })
   }

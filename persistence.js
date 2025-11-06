@@ -7,6 +7,7 @@ let photoCollection
 let userCollection
 let albumCollection
 let sessionData
+let commentCollection
 
 async function connectDatabase() {
   if (!client) {
@@ -16,10 +17,23 @@ async function connectDatabase() {
     photoCollection = db.collection('photos')
     albumCollection = db.collection('albums')
     userCollection = db.collection('users')
+    commentCollection = db.collection('comments')
     sessionData = db.collection('sessionData')
   }
   return client.db('infs3201_fall2025')
 }
+async function addComment(comment){
+  await connectDatabase()
+  await commentCollection.insertOne(comment)
+  return true
+}
+
+async function getCommentByPhoto(photoId){
+  await connectDatabase()
+  let docs = await commentCollection.find({photoId:photoId}).sort({createdAt:1}).toArray()
+  return docs
+}
+
 async function loadAlbumData() {
   const db = await connectDatabase()
   return db.collection('albums').find({}).toArray()
@@ -112,5 +126,7 @@ module.exports = {
     getSessionData,
     deleteSession,
     saveSession,
-    getUserDetails
+    getUserDetails,
+    addComment,
+    getCommentByPhoto
 }
