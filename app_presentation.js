@@ -114,25 +114,29 @@ app.get('/photo/:id', requireLogin, async (req, res) => {
   if (!canView) {
     return res.render('error', { msg: 'You do not have access to this photo.', layout: undefined })
   }
+  let canEdit = await business.canEditPhoto(req.username, photo)
 
   const comments = await business.getCommentsByPhoto(photoId)
-  res.render('photo', { photo, comments, layout: undefined })
+  res.render('photo', { photo,canEdit, comments, layout: undefined })
 })
 
 app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
   let photoId = Number(req.params.id)
   let text = req.body.text
+  let username = req.username
   let photo = await business.findPhoto(photoId)
   let canView = await business.canViewPhoto(req.username,photo)
   if(!canView){
     return res.render('error',{layout:undefined,msg:'You do not have access to this photo.'})
   }
+  let canEdit = await business.canEditPhoto(username, photo)
   if(!text||text.trim() === ''){
     let comments = await business.getCommentsByPhoto(photoId)
     return res.render('photo', {
       layout:undefined,
       photo,
       comments,
+      canEdit:canEdit,
       message:'comment cannot be empty'
     }
     )
@@ -143,6 +147,7 @@ app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
     layout:undefined,
     photo,
     comments,
+    canEdit:canEdit,
     message: 'comment added'
   })
 })

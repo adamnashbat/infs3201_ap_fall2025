@@ -16,7 +16,9 @@
   <textarea name="text" rows="3" cols="40"></textarea>
   <button type="submit">Post Comment</button>
 </form>
+{{#if canEdit}}
 <p><a href="/edit?pid={{photo.id}}" method="post">Edit</a></p>
+{{/if}}
 <br>
 <p>
   <a href="/album-list">Back to Albums</a> | <a href="/logout">Logout</a>
