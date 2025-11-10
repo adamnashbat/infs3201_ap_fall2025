@@ -169,9 +169,12 @@ async function albumPhotoList(albumId) {
 
 async function checkLogin(username, password) {
     let user = await persistence.getUserDetails(username)
-    let hashedPassword = crypto.createHash('sha256').update(password).digest('hex')
-    console.log(hashedPassword)
-    if(user!==null && user.username===username && user.password===hashedPassword){
+    if(!user) return false
+
+    let [salt, storedHash] = user.password.split('$')
+    if(!salt || !storedHash) return false
+    let hashedPassword = crypto.createHash('sha256').update(salt + password).digest('hex')
+    if(user.username === username && storedHash === hashedPassword){
         return true
     }
     return false
@@ -207,25 +210,27 @@ async function addUser(username, password, firstName, lastName, email){
       return false
     }
   }
-
   let id;
   let unique = false;
   while (!unique) {
     id = Math.floor(Math.random() * 1000000);
     unique = true
-    for (let i = 0; i < users.length; i++) {
-      if (users[i].id === id) {
+    for (let i of users) {
+      if (i.id === id) {
         unique = false
         break
       }
     }
   }
-  let hashedPassword = crypto.createHash('sha256').update(password).digest('hex')
+
+  let salt = crypto.randomBytes(8).toString('hex')
+  let hashedPassword = crypto.createHash('sha256').update(salt + password).digest('hex')
+  let storedPassword = `${salt}$${hashedPassword}`
 
   let newUser = {
     id,
     username,
-    password : hashedPassword,
+    password : storedPassword,
     firstName,
     lastName,
     email
