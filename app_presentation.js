@@ -1,3 +1,4 @@
+// Adam Nashbat - 60304819, Saif Al Deen Judeh - 60306539, INFS3201 Project
 const express = require('express')
 const exphbs = require('express-handlebars')
 const path = require('path')
@@ -18,6 +19,15 @@ app.use(cookieParser())
 app.use(bodyParser.urlencoded())
 let album
 
+
+/**
+ * Middleware to ensure a user is logged in before accessing a route.
+ * If the session key is missing or expired, the user is redirected to the login page.
+ * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ * @param {import('express').NextFunction} next - The next middleware function.
+ */
 async function requireLogin(req,res,next){
   const sessionKey = req.cookies.sessionkey
   if(!sessionKey){

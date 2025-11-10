@@ -1,4 +1,4 @@
-// Adam Nashbat, 60304819, INFS3201 Assignment 2
+// Adam Nashbat - 60304819, Saif Al Deen Judeh - 60306539, INFS3201 Project
 const persistence = require("./persistence.js")
 const crypto = require('crypto')
 /**
@@ -25,6 +25,7 @@ async function loadPhotos() {
  * Saves all photo data to persistence.
  * @async
  * @function
+ * @param {Object[]} photoList - An array of photo objects to save.
  * @returns {Promise<void>} A promise that resolves when the data has been saved.
  */
 async function savePhotos(photoList) {
@@ -32,13 +33,14 @@ async function savePhotos(photoList) {
 }
 
 /**
- * Updates the title and description of a specific photo.
+ * Updates details of a specific photo, including title, description, and visibility.
  * @async
  * @function
  * @param {number} photoId - The ID of the photo to update.
  * @param {string} title - The new title for the photo.
  * @param {string} description - The new description for the photo.
- * @returns {Promise<Object|null>} The updated photo object, or null if the photo was not found.
+ * @param {'public'|'private'} visibility - The updated visibility setting.
+ * @returns {Promise<Object|null>} The updated photo object, or null if not found.
  */
 async function updatePhotoDetails(photoId, title, description, visibility) {
   const photos = await loadPhotos()
@@ -61,6 +63,15 @@ async function updatePhotoDetails(photoId, title, description, visibility) {
   return photo
 }
 
+
+/**
+ * Determines whether a user is allowed to view a given photo.
+ * @async
+ * @function
+ * @param {string} username - The username of the user attempting to view the photo.
+ * @param {Object} photo - The photo object to check.
+ * @returns {Promise<boolean>} True if the user can view the photo, false otherwise.
+ */
 async function canViewPhoto(username,photo) {
   if(photo.visibility === 'public'){
     return true
@@ -69,11 +80,28 @@ async function canViewPhoto(username,photo) {
   
 }
 
+
+/**
+ * Determines whether a user is allowed to edit a given photo.
+ * @async
+ * @function
+ * @param {string} username - The username of the user attempting to edit the photo.
+ * @param {Object} photo - The photo object to check.
+ * @returns {Promise<boolean>} True if the user owns the photo, false otherwise.
+ */
 async function canEditPhoto(username,photo) {
   return photo.ownerUsername === username
   
 }
 
+/**
+ * Retrieves all photos from a given album that are visible to a specific user.
+ * @async
+ * @function
+ * @param {number} albumId - The ID of the album to check.
+ * @param {string} username - The username of the user requesting visibility.
+ * @returns {Promise<Object[]>} An array of photo objects visible to the user.
+ */
 async function albumPhotoListVisibleToUser(albumId, username) {
   const photos= await loadPhotos()
   let out = []
@@ -97,6 +125,16 @@ async function albumPhotoListVisibleToUser(albumId, username) {
   return out
 }
 
+
+/**
+ * Adds a new comment to a specific photo.
+ * @async
+ * @function
+ * @param {number} photoId - The ID of the photo to comment on.
+ * @param {string} username - The username of the user adding the comment.
+ * @param {string} commentText - The text of the comment.
+ * @returns {Promise<Object>} The newly created comment object.
+ */
 async function addComment(photoId,username,commentText) {
   return await persistence.addComment({
     id: Date.now(),
@@ -106,16 +144,25 @@ async function addComment(photoId,username,commentText) {
     createdAt:new Date()
   })
 }
+
+
+/**
+ * Retrieves all comments associated with a specific photo.
+ * @async
+ * @function
+ * @param {number} photoId - The ID of the photo.
+ * @returns {Promise<Object[]>} A list of comment objects for that photo.
+ */
 async function getCommentsByPhoto(photoId) {
   return await persistence.getCommentByPhoto(photoId)
 }
 
 /**
- * Finds and returns a photo by its ID.
+ * Finds and returns a specific photo by its ID.
  * @async
  * @function
  * @param {number} photoId - The ID of the photo to find.
- * @returns {Promise<Object|null>} The photo object if found, or null if not found.
+ * @returns {Promise<Object|null>} The photo object if found, or null otherwise.
  */
 async function findPhoto(photoId) {
   const photos = await loadPhotos()
@@ -128,7 +175,7 @@ async function findPhoto(photoId) {
 }
 
 /**
- * Retrieves an album by its ID.
+ * Retrieves a specific album by its ID.
  * @async
  * @function
  * @param {number} albumId - The ID of the album to retrieve.
@@ -147,11 +194,11 @@ async function getAlbumById(albumId) {
 }
 
 /**
- * Returns all photos that belong to a given album.
+ * Retrieves all photos that belong to a specific album, regardless of visibility.
  * @async
  * @function
- * @param {number} albumId - The ID of the album to retrieve photos for.
- * @returns {Promise<Object[]>} An array of photo objects belonging to the album.
+ * @param {number} albumId - The ID of the album.
+ * @returns {Promise<Object[]>} A list of photo objects associated with the album.
  */
 async function albumPhotoList(albumId) {
   const photos = await loadPhotos()
@@ -167,6 +214,15 @@ async function albumPhotoList(albumId) {
   return albumPhotos
 }
 
+
+/**
+ * Verifies a user's login credentials by comparing the provided password with the stored salted hash.
+ * @async
+ * @function
+ * @param {string} username - The username to authenticate.
+ * @param {string} password - The plain-text password to verify.
+ * @returns {Promise<boolean>} True if credentials are valid, false otherwise.
+ */
 async function checkLogin(username, password) {
     let user = await persistence.getUserDetails(username)
     if(!user) return false
@@ -180,6 +236,14 @@ async function checkLogin(username, password) {
     return false
 }
 
+
+/**
+ * Starts a new session for a logged-in user and stores it in persistence.
+ * @async
+ * @function
+ * @param {Object} data - Arbitrary session data (e.g., username).
+ * @returns {Promise<Object>} The created session object including key, expiry, and data.
+ */
 async function startSession(data) {
     let sessionKey = crypto.randomUUID()
     let expiry = new Date(Date.now() + 5 * 60 * 1000 )
@@ -193,16 +257,43 @@ async function startSession(data) {
     return sessionData
 }
 
+
+/**
+ * Retrieves session data associated with a given session key.
+ * @async
+ * @function
+ * @param {string} key - The session key.
+ * @returns {Promise<Object|null>} The session data if found, or null otherwise.
+ */
 async function getSessionData(key) {
     return await persistence.getSessionData(key)
 }
   
 
-
+/**
+ * Deletes an existing session by its session key.
+ * @async
+ * @function
+ * @param {string} key - The session key to delete.
+ * @returns {Promise<void>} A promise that resolves when the session has been deleted.
+ */
 async function deleteSession(key) {
     return await persistence.deleteSession(key)
 }
 
+
+/**
+ * Registers a new user account with a salted and hashed password.
+ * Ensures that the username and email are unique.
+ * @async
+ * @function
+ * @param {string} username - The desired username.
+ * @param {string} password - The plain-text password.
+ * @param {string} firstName - The user's first name.
+ * @param {string} lastName - The user's last name.
+ * @param {string} email - The user's email address.
+ * @returns {Promise<boolean>} True if registration succeeds, false if username/email already exist.
+ */
 async function addUser(username, password, firstName, lastName, email){
   let users = await persistence.loadUserData()
   for(let i of users){
