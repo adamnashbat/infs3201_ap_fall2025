@@ -39,7 +39,7 @@ body {
     text-align: center;
 }
 
-.login-container h1, .register-container h1 {
+.login-container, .register-container {
     text-align: center;
     color: #1a2d70; 
 }
@@ -51,6 +51,7 @@ body {
     margin-bottom: 12px;
     border: 1px solid #1a2d70;
     border-radius: 6px; 
+    max-width: 300px;
 }
 
 .login-container button,
@@ -90,7 +91,6 @@ body {
     grid-template-columns: 1fr;
     gap: 10px;
 }
- */
 .photo-item {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -118,4 +118,22 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+.upload a{
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #07691e;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    transition: 0.2s;
+    border: black 5px solid;
+}
+
+.upload a:hover {
+    background-color: #055816;
+    transform: scale(1.05);
+    border-color: #000000;
 }

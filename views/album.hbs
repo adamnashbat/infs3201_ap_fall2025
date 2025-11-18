@@ -1,10 +1,10 @@
 <p>
-  <a href="/album-list">Back to Albums</a> | <a href="/logout">Logout</a>
+  <a href="/album-list">Back to Albums</a> | <a href="/logout">Logout</a> 
 </p>
 <h1>Photos in {{album.name}} ({{count}} photo{{s}})</h1>
 
 <p>{{album.description}}</p>
-
+<div class="upload"><a href="/upload">Upload Photo</a></div>
 <div class="photo-grid">
   {{#each albumPhotos}}
     <div class="photo-item">
@@ -16,5 +16,9 @@
   {{/each}}
 </div>
 
-
+upload a:hover {
+    background-color: #055816; /* slightly darker green */
+    transform: scale(1.05);    /* small zoom effect */
+    border-color: #003d0f;     /* optional: darker border on hover */
+}
 
