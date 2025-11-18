@@ -10,13 +10,14 @@ const bodyParser = require('body-parser')
 const app = express()
 const port = 8000
 
-app.engine('hbs', exphbs.engine({ extname: '.hbs', defaultLayout: false }))
+app.engine('hbs', exphbs.engine({ extname: '.hbs', defaultLayout: 'main' }))
 app.set('view engine', 'hbs')
 app.set('views', path.join(__dirname, 'views'))
 app.use('/photos', express.static(path.join(__dirname, 'public/photos')))
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(bodyParser.urlencoded())
+app.use('/css', express.static(path.join(__dirname, 'public/css')))
 let album
 
 
@@ -43,7 +44,7 @@ async function requireLogin(req,res,next){
 
 
 app.get('/', (req, res) => {
-    res.render('login', {layout: undefined, message: req.query.message})
+    res.render('login', {message: req.query.message})
 })
 app.post('/', async (req,res) => {
     let username = req.body.username
@@ -59,7 +60,7 @@ app.post('/', async (req,res) => {
     }
 })
 app.get('/register', async(req, res)=>{
-  res.render('register', {layout:undefined, message: req.query.message})
+  res.render('register', {message: req.query.message})
 })
 app.post('/register', async(req, res)=>{
   let username = req.body.username
@@ -96,14 +97,14 @@ app.get('/album-list', requireLogin, async (req,res)=>{
     return res.redirect("/?message=Session expired")
   }
   let albums= await business.loadAlbum()
-  res.render('albumList', {message:req.query.message, albums, layout:undefined})
+  res.render('albumList', {message:req.query.message, albums})
 })
 
 app.get('/album/:id', requireLogin, async (req, res) => {
   const albumId = Number(req.params.id)
   const album = await business.getAlbumById(albumId)
   if (!album) {
-    return res.render('error', { msg: 'Album not found.', layout: undefined })
+    return res.render('error', { msg: 'Album not found.' })
   }
   let albumPhotos = await business.albumPhotoListVisibleToUser(albumId,req.username)
   let count = albumPhotos.length
@@ -112,22 +113,22 @@ app.get('/album/:id', requireLogin, async (req, res) => {
     s = ''
   }
 
-  res.render('album', { album, albumPhotos, count, s, layout: undefined })
+  res.render('album', { album, albumPhotos, count, s})
 })
 app.get('/photo/:id', requireLogin, async (req, res) => {
   const photoId = Number(req.params.id)
   const photo = await business.findPhoto(photoId)
   if (!photo) {
-    return res.render('error', { msg: 'Photo not found.', layout: undefined })
+    return res.render('error', { msg: 'Photo not found.'})
   }
   const canView = await business.canViewPhoto(req.username, photo)
   if (!canView) {
-    return res.render('error', { msg: 'You do not have access to this photo.', layout: undefined })
+    return res.render('error', { msg: 'You do not have access to this photo.'})
   }
   let canEdit = await business.canEditPhoto(req.username, photo)
 
   const comments = await business.getCommentsByPhoto(photoId)
-  res.render('photo', { photo,canEdit, comments, layout: undefined })
+  res.render('photo', { photo,canEdit, comments})
 })
 
 app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
@@ -137,13 +138,12 @@ app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
   let photo = await business.findPhoto(photoId)
   let canView = await business.canViewPhoto(req.username,photo)
   if(!canView){
-    return res.render('error',{layout:undefined,msg:'You do not have access to this photo.'})
+    return res.render('error',{msg:'You do not have access to this photo.'})
   }
   let canEdit = await business.canEditPhoto(username, photo)
   if(!text||text.trim() === ''){
     let comments = await business.getCommentsByPhoto(photoId)
     return res.render('photo', {
-      layout:undefined,
       photo,
       comments,
       canEdit:canEdit,
@@ -154,7 +154,6 @@ app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
   await business.addComment(photoId,req.username,text.trim())
   let comments = await business.getCommentsByPhoto(photoId)
   res.render('photo',{
-    layout:undefined,
     photo,
     comments,
     canEdit:canEdit,
@@ -166,9 +165,9 @@ app.get('/edit', requireLogin, async (req, res) => {
   const photoId = Number(req.query.pid)
   const photo = await business.findPhoto(photoId)
   if (!photo) {
-    return res.render('error', { msg: 'Photo not found.', layout: undefined })
+    return res.render('error', { msg: 'Photo not found.'})
   }
-  res.render('photoEdit', { photo, layout: undefined })
+  res.render('photoEdit', { photo})
 })
 
 app.post('/edit', requireLogin, async (req, res) => {
@@ -177,7 +176,7 @@ app.post('/edit', requireLogin, async (req, res) => {
   const visibility = req.body.visibility
   const photo = await business.updatePhotoDetails(photoId, title, description, visibility)
   if (!photo) {
-    return res.render('error', { msg: 'Update failed', layout: undefined })
+    return res.render('error', { msg: 'Update failed'})
   }
   res.redirect(`/photo/${photoId}`)
 })

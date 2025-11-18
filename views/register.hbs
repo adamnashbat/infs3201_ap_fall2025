@@ -1,16 +1,18 @@
 {{#if message}}
-<div>
+<div class="message">
     {{ message }}
 </div>
 {{/if}}
 <h1>Create new account</h1>
+<div class="register-container">
 <form method="post">
     First Name: <input name="firstName" required><br>
     Last Name: <input name="lastName" required ><br>
     Username: <input name="username"required ><br>
     Password: <input type="password" name="password" required><br>
     Email: <input name="email" required><br> 
-    <input type="submit">
+     <button type="submit">Sign up</button>
 </form>
+</div>
 <br>
 <a href="/">Back to login page</a>

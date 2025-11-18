@@ -1,4 +1,8 @@
+<p>
+  <a href="/album-list">Back to Albums</a> | <a href="/logout">Logout</a>
+</p>
 <h1>Photos in {{album.name}} ({{count}} photo{{s}})</h1>
+
 <p>{{album.description}}</p>
 
 <div class="photo-grid">
@@ -12,40 +16,5 @@
   {{/each}}
 </div>
 
-<p>
-  <a href="/album-list">Back to Albums</a> | <a href="/logout">Logout</a>
-</p>
-
-<style>
-.photo-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px; 
-}
 
 
-.photo-item {
-  display: grid; 
-  grid-template-columns: auto 1fr;
-  align-items: center; 
-  padding: 5px;
-  max-width: 500px; 
-  gap: 10px; 
-}
-
-
-.photo-item img {
-  max-width: 200px;
-  max-height: 200px;
-  object-fit: cover;
-  display: block;
-  margin: 0 auto;
-  border: darkblue 6px solid
-}
-
-
-.photo-item p {
-  margin-top: 5px;
-  font-size: 0.9em;
-}
-</style>
