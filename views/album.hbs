@@ -9,16 +9,12 @@
   {{#each albumPhotos}}
     <div class="photo-item">
       <a href="/photo/{{id}}">
-        <img src="/photos/{{filename}}" alt="{{title}}">
+        <img src="/photo/{{id}}/image" alt="{{title}}">
       </a>
       <p>{{title}}</p>
     </div>
   {{/each}}
 </div>
 
-upload a:hover {
-    background-color: #055816; /* slightly darker green */
-    transform: scale(1.05);    /* small zoom effect */
-    border-color: #003d0f;     /* optional: darker border on hover */
-}
+
 

@@ -13,10 +13,33 @@ const port = 8000
 app.engine('hbs', exphbs.engine({ extname: '.hbs', defaultLayout: 'main' }))
 app.set('view engine', 'hbs')
 app.set('views', path.join(__dirname, 'views'))
-app.use('/photos', express.static(path.join(__dirname, 'public/photos')))
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(bodyParser.urlencoded())
+/**
+ * GET photo.
+ * Checks user session and photo visibility before serving the photo.
+ * @async
+ */
+app.get('/photo/:id/image', requireLogin, async (req, res) => {
+    const photoId = Number(req.params.id)
+    const photo = await business.findPhoto(photoId)
+
+    if (!photo) {
+        return res.render('error', { msg: 'Photo not found.' })
+    }
+
+
+    const canView = await business.canViewPhoto(req.username, photo)
+    if (!canView) {
+        return res.render('error', { msg: 'You do not have access to this photo.' })
+    }
+
+   
+    const photoPath = path.join(__dirname, 'public/photos', photo.filename)
+    console.log(photoPath)  
+    res.sendFile(photoPath)
+})
 app.use('/css', express.static(path.join(__dirname, 'public/css')))
 let album
 

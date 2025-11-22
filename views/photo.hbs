@@ -1,7 +1,7 @@
 <h1>Photo Details</h1>
 <p>Title: {{photo.title}}</p>
 <p>Description: {{photo.description}}</p>
-<img src="/photos/{{photo.filename}}" style="max-width: 300px;" alt="{{photo.title}}">
+<img src="/photo/{{photo.id}}/image" style="max-width: 300px;" alt="{{photo.title}}">
 <h3>Comments</h3>
 {{#if comments}}
   <ul>
