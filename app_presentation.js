@@ -42,10 +42,21 @@ async function requireLogin(req,res,next){
   next()
 }
 
-
+/**
+ * GET login page.
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ */
 app.get('/', (req, res) => {
     res.render('login', {message: req.query.message})
 })
+
+
+/**
+ * POST login attempt.
+ * Validates credentials and starts a session.
+ * @async
+ */
 app.post('/', async (req,res) => {
     let username = req.body.username
     let password = req.body.password
@@ -59,9 +70,23 @@ app.post('/', async (req,res) => {
         res.redirect('/?message=Failed to log in - invalid credentials.')
     }
 })
+
+
+
+/**
+ * GET registration page.
+ */
 app.get('/register', async(req, res)=>{
   res.render('register', {message: req.query.message})
 })
+
+
+
+/**
+ * POST new user registration.
+ * Creates account & starts session.
+ * @async
+ */
 app.post('/register', async(req, res)=>{
   let username = req.body.username
   let password = req.body.password
@@ -78,6 +103,14 @@ app.post('/register', async(req, res)=>{
   res.redirect('/album-list?message=Successfully created account. Welcome!')
 
 })
+
+
+
+/**
+ * GET logout.
+ * Clears session cookie and deletes session.
+ * @async
+ */
 app.get('/logout', async (req, res) => {
   let sessionKey = req.cookies.sessionkey
   console.log(sessionKey)
@@ -87,6 +120,13 @@ app.get('/logout', async (req, res) => {
   }
   res.redirect('/')
 })
+
+
+/**
+ * GET list of all albums.
+ * Protected by login middleware.
+ * @async
+ */
 app.get('/album-list', requireLogin, async (req,res)=>{
   let sessionKey = req.cookies.sessionkey
   if (!sessionKey) {
@@ -100,6 +140,12 @@ app.get('/album-list', requireLogin, async (req,res)=>{
   res.render('albumList', {message:req.query.message, albums})
 })
 
+
+
+/**
+ * GET a specific album and photos visible to the user.
+ * @async
+ */
 app.get('/album/:id', requireLogin, async (req, res) => {
   const albumId = Number(req.params.id)
   const album = await business.getAlbumById(albumId)
@@ -115,6 +161,13 @@ app.get('/album/:id', requireLogin, async (req, res) => {
 
   res.render('album', { album, albumPhotos, count, s})
 })
+
+
+/**
+ * GET a specific photo.
+ * Checks view permissions & loads comments.
+ * @async
+ */
 app.get('/photo/:id', requireLogin, async (req, res) => {
   const photoId = Number(req.params.id)
   const photo = await business.findPhoto(photoId)
@@ -131,6 +184,13 @@ app.get('/photo/:id', requireLogin, async (req, res) => {
   res.render('photo', { photo,canEdit, comments})
 })
 
+
+
+/**
+ * POST add comment to photo.
+ * Validates view permissions & comment text.
+ * @async
+ */
 app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
   let photoId = Number(req.params.id)
   let text = req.body.text
@@ -161,6 +221,12 @@ app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
   })
 })
 
+
+
+/**
+ * GET edit photo page.
+ * @async
+ */
 app.get('/edit', requireLogin, async (req, res) => {
   const photoId = Number(req.query.pid)
   const photo = await business.findPhoto(photoId)
@@ -170,6 +236,12 @@ app.get('/edit', requireLogin, async (req, res) => {
   res.render('photoEdit', { photo})
 })
 
+
+
+/**
+ * POST update photo metadata (title, description, visibility).
+ * @async
+ */
 app.post('/edit', requireLogin, async (req, res) => {
   const photoId = Number(req.query.pid)
   const { title, description } = req.body
@@ -181,6 +253,11 @@ app.post('/edit', requireLogin, async (req, res) => {
   res.redirect(`/photo/${photoId}`)
 })
 
+
+
+/**
+ * Starts the Express server.
+ */
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`)
 })
