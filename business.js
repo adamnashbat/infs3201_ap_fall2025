@@ -21,46 +21,19 @@ async function loadPhotos() {
     return await persistence.loadPhotosData()
 }
 
-/**
- * Saves all photo data to persistence.
- * @async
- * @function
- * @param {Object[]} photoList - An array of photo objects to save.
- * @returns {Promise<void>} A promise that resolves when the data has been saved.
- */
-async function savePhotos(photoList) {
-    return await persistence.savePhotosData(photoList)
-}
 
-/**
- * Updates details of a specific photo, including title, description, and visibility.
- * @async
- * @function
- * @param {number} photoId - The ID of the photo to update.
- * @param {string} title - The new title for the photo.
- * @param {string} description - The new description for the photo.
- * @param {'public'|'private'} visibility - The updated visibility setting.
- * @returns {Promise<Object|null>} The updated photo object, or null if not found.
- */
 async function updatePhotoDetails(photoId, title, description, visibility) {
-  const photos = await loadPhotos()
-  let photo = null
-  for (let i of photos) {
-    if (i.id == photoId) {
-      photo = i
-      break
-    }
+  const fieldsToUpdate = {
+    title,
+    description
   }
-  if (!photo){
-    return null
+
+  if (visibility === "public" || visibility === "private") {
+    fieldsToUpdate.visibility = visibility
   }
-  photo.title = title
-  photo.description = description
-  if (visibility == 'public' || visibility == 'private'){
-    photo.visibility = visibility
-  }
-  await savePhotos(photos)
-  return photo
+
+  const updated = await persistence.updatePhotoById(photoId, fieldsToUpdate)
+  return updated 
 }
 
 
@@ -334,7 +307,6 @@ async function addUser(username, password, firstName, lastName, email){
 module.exports = {
     loadAlbum,
     loadPhotos,
-    savePhotos,
     updatePhotoDetails,
     findPhoto,
     albumPhotoList,

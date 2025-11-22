@@ -110,22 +110,15 @@ async function getUserDetails(username) {
     return null
 }
 
-
-/**
- * Updates multiple photo documents in the database.
- * @async
- * @function
- * @param {Object[]} photoList - An array of photo objects to save.
- * @returns {Promise<void>} Resolves when all photos have been updated.
- */
-async function savePhotosData(photoList) {
-    await connectDatabase()
-    for (let photo of photoList) {
-        await photoCollection.updateOne(
-            { id: photo.id },
-            { $set: photo }
-        )
-    }
+async function updatePhotoById(photoId, fieldsToUpdate) {
+  await connectDatabase()
+  const result = await photoCollection.findOneAndUpdate(
+    { id: photoId },
+    { $set: fieldsToUpdate },
+    { returnDocument: "after" }
+  )
+  console.log(`Result value: `, result )
+  return result
 }
 
 
@@ -218,7 +211,6 @@ async function deleteSession(key) {
 module.exports = {
     loadAlbumData,
     loadPhotosData,
-    savePhotosData,
     loadUserData,
     saveUserData,
     getSessionData,
@@ -226,5 +218,6 @@ module.exports = {
     saveSession,
     getUserDetails,
     addComment,
-    getCommentByPhoto
+    getCommentByPhoto,
+    updatePhotoById
 }

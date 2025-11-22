@@ -37,7 +37,6 @@ app.get('/photo/:id/image', requireLogin, async (req, res) => {
 
    
     const photoPath = path.join(__dirname, 'public/photos', photo.filename)
-    console.log(photoPath)  
     res.sendFile(photoPath)
 })
 app.use('/css', express.static(path.join(__dirname, 'public/css')))
