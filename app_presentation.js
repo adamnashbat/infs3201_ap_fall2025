@@ -20,6 +20,8 @@ app.use(bodyParser.urlencoded())
  * GET photo.
  * Checks user session and photo visibility before serving the photo.
  * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.get('/photo/:id/image', requireLogin, async (req, res) => {
     const photoId = Number(req.params.id)
@@ -78,6 +80,8 @@ app.get('/', (req, res) => {
  * POST login attempt.
  * Validates credentials and starts a session.
  * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.post('/', async (req,res) => {
     let username = req.body.username
@@ -97,6 +101,8 @@ app.post('/', async (req,res) => {
 
 /**
  * GET registration page.
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.get('/register', async(req, res)=>{
   res.render('register', {message: req.query.message})
@@ -108,6 +114,8 @@ app.get('/register', async(req, res)=>{
  * POST new user registration.
  * Creates account & starts session.
  * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.post('/register', async(req, res)=>{
   let username = req.body.username
@@ -132,6 +140,8 @@ app.post('/register', async(req, res)=>{
  * GET logout.
  * Clears session cookie and deletes session.
  * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.get('/logout', async (req, res) => {
   let sessionKey = req.cookies.sessionkey
@@ -148,6 +158,8 @@ app.get('/logout', async (req, res) => {
  * GET list of all albums.
  * Protected by login middleware.
  * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.get('/album-list', requireLogin, async (req,res)=>{
   let sessionKey = req.cookies.sessionkey
@@ -167,6 +179,8 @@ app.get('/album-list', requireLogin, async (req,res)=>{
 /**
  * GET a specific album and photos visible to the user.
  * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.get('/album/:id', requireLogin, async (req, res) => {
   const albumId = Number(req.params.id)
@@ -189,6 +203,8 @@ app.get('/album/:id', requireLogin, async (req, res) => {
  * GET a specific photo.
  * Checks view permissions & loads comments.
  * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.get('/photo/:id', requireLogin, async (req, res) => {
   const photoId = Number(req.params.id)
@@ -207,11 +223,12 @@ app.get('/photo/:id', requireLogin, async (req, res) => {
 })
 
 
-
 /**
  * POST add comment to photo.
  * Validates view permissions & comment text.
  * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
   let photoId = Number(req.params.id)
@@ -248,6 +265,8 @@ app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
 /**
  * GET edit photo page.
  * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.get('/edit', requireLogin, async (req, res) => {
   const photoId = Number(req.query.pid)
@@ -263,6 +282,8 @@ app.get('/edit', requireLogin, async (req, res) => {
 /**
  * POST update photo metadata (title, description, visibility).
  * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
  */
 app.post('/edit', requireLogin, async (req, res) => {
   const photoId = Number(req.query.pid)

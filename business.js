@@ -22,6 +22,20 @@ async function loadPhotos() {
 }
 
 
+
+
+/**
+ * Updates details of a specific photo, enforcing that only the owner can edit it.
+ * @async
+ * @function
+ * @param {number} photoId - The ID of the photo to update.
+ * @param {string} user - The username of the user attempting the update.
+ * @param {string} title - The new title for the photo.
+ * @param {string} description - The new description for the photo.
+ * @param {'public'|'private'} visibility - The new visibility status of the photo.
+ * @throws {Error} If the user is not allowed to edit the photo.
+ * @returns {Promise<Object|null>} The updated photo object, or null if photo not found.
+ */
 async function updatePhotoDetails(photoId, user, title, description, visibility) {
     const photo = await findPhoto(photoId);
     if (!photo) return null

@@ -110,6 +110,17 @@ async function getUserDetails(username) {
     return null
 }
 
+
+
+
+/**
+ * Updates a single photo document by its ID, returning the updated document.
+ * @async
+ * @function
+ * @param {number} photoId - The ID of the photo to update.
+ * @param {Object} fieldsToUpdate - An object containing the fields to update.
+ * @returns {Promise<Object>} The result object from MongoDB containing the updated document in `value`.
+ */
 async function updatePhotoById(photoId, fieldsToUpdate) {
   await connectDatabase()
   const result = await photoCollection.findOneAndUpdate(
