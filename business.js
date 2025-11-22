@@ -22,19 +22,21 @@ async function loadPhotos() {
 }
 
 
-async function updatePhotoDetails(photoId, title, description, visibility) {
-  const fieldsToUpdate = {
-    title,
-    description
-  }
+async function updatePhotoDetails(photoId, user, title, description, visibility) {
+    const photo = await findPhoto(photoId);
+    if (!photo) return null
 
-  if (visibility === "public" || visibility === "private") {
-    fieldsToUpdate.visibility = visibility
-  }
+    if (photo.ownerUsername !== user) {
+        throw new Error('User not allowed to edit this photo')
+    }
 
-  const updated = await persistence.updatePhotoById(photoId, fieldsToUpdate)
-  return updated 
+    const fieldsToUpdate = { title, description };
+    if (visibility === 'public' || visibility === 'private') fieldsToUpdate.visibility = visibility
+
+    const updated = await persistence.updatePhotoById(photoId, fieldsToUpdate)
+    return updated
 }
+
 
 
 /**

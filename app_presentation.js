@@ -268,7 +268,7 @@ app.post('/edit', requireLogin, async (req, res) => {
   const photoId = Number(req.query.pid)
   const { title, description } = req.body
   const visibility = req.body.visibility
-  const photo = await business.updatePhotoDetails(photoId, title, description, visibility)
+  const photo = await business.updatePhotoDetails(photoId, req.username, title, description, visibility)
   if (!photo) {
     return res.render('error', { msg: 'Update failed'})
   }

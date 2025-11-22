@@ -117,7 +117,6 @@ async function updatePhotoById(photoId, fieldsToUpdate) {
     { $set: fieldsToUpdate },
     { returnDocument: "after" }
   )
-  console.log(`Result value: `, result )
   return result
 }
 
