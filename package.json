@@ -3,7 +3,6 @@
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cookie-parser": "^1.4.7",
-    "crypto": "^1.0.1",
     "express": "^5.1.0",
     "express-handlebars": "^8.0.1",
     "mongodb": "^6.21.0",
@@ -19,5 +18,13 @@
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adamnashbat/infs3201_ap_fall2025.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adamnashbat/infs3201_ap_fall2025/issues"
+  },
+  "homepage": "https://github.com/adamnashbat/infs3201_ap_fall2025#readme"
 }
