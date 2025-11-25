@@ -212,6 +212,10 @@ app.get('/album/:id/upload', requireLogin,async (req,res)=>{
 
 app.post('/album/:id/upload', requireLogin, async (req, res) => {
   let albumId = Number(req.params.id)
+  let description = req.body.description
+  let title = req.body.title
+  console.log(description)
+  console.log(title)
 
   console.log('req.files =', req.files)
 
@@ -234,8 +238,8 @@ app.post('/album/:id/upload', requireLogin, async (req, res) => {
       filename: safeName,
       ownerUsername: req.username,
       visibility: "private",
-      title: "",
-      description: "",
+      title: title,
+      description: description,
       tags: [],
       albums: [albumId]
     })

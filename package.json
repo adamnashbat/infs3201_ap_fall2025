@@ -19,7 +19,6 @@
   },
   "author": "",
   "license": "ISC",
-  "description": "",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adamnashbat/infs3201_ap_fall2025.git"
@@ -27,5 +26,6 @@
   "bugs": {
     "url": "https://github.com/adamnashbat/infs3201_ap_fall2025/issues"
   },
-  "homepage": "https://github.com/adamnashbat/infs3201_ap_fall2025#readme"
+  "homepage": "https://github.com/adamnashbat/infs3201_ap_fall2025#readme",
+  "description": ""
 }
