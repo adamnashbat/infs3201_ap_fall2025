@@ -343,6 +343,11 @@ async function addUser(username, password, firstName, lastName, email){
   return true
 }
 
+async function getUserByUsername(username) {
+  return await persistence.getUserDetails(username)
+  
+}
+
 
 
 module.exports = {
@@ -362,5 +367,6 @@ module.exports = {
     albumPhotoListVisibleToUser,
     addComment,
     getCommentsByPhoto,
-    addPhoto
+    addPhoto,
+    getUserByUsername
 }

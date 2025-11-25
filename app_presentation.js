@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser')
 const business = require('./business.js')
 const bodyParser = require('body-parser')
 const fileUpload = require('express-fileupload')
+const Mail = require('./email.js')
 
 const app = express()
 const port = 8000
@@ -295,6 +296,13 @@ app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
     )
   }
   await business.addComment(photoId,req.username,text.trim())
+  let ownerUsername = photo.ownerUsername
+  let ownerUser = await business.getUserByUsername(ownerUsername)
+  if(ownerUser && ownerUser.email){
+    let subject = "New comment on your photo"
+    let body = "User "+username+" commented: "+text.trim()
+    Mail.sendMail(ownerUser.email,subject,body)
+  }
   let comments = await business.getCommentsByPhoto(photoId)
   res.render('photo',{
     photo,
