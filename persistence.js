@@ -218,6 +218,14 @@ async function deleteSession(key) {
 }
 
 
+async function addPhoto(photo) {
+  await connectDatabase()
+  await photoCollection.insertOne(photo)
+  return true
+  
+}
+
+
 module.exports = {
     loadAlbumData,
     loadPhotosData,
@@ -229,5 +237,6 @@ module.exports = {
     getUserDetails,
     addComment,
     getCommentByPhoto,
-    updatePhotoById
+    updatePhotoById,
+    addPhoto 
 }

@@ -5,6 +5,7 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const business = require('./business.js')
 const bodyParser = require('body-parser')
+const fileUpload = require('express-fileupload')
 
 const app = express()
 const port = 8000
@@ -12,6 +13,7 @@ const port = 8000
 app.engine('hbs', exphbs.engine({ extname: '.hbs', defaultLayout: 'main' }))
 app.set('view engine', 'hbs')
 app.set('views', path.join(__dirname, 'views'))
+app.use(fileUpload())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(bodyParser.urlencoded())
@@ -195,6 +197,49 @@ app.get('/album/:id', requireLogin, async (req, res) => {
   }
 
   res.render('album', { album, albumPhotos, count, s})
+})
+
+
+app.get('/album/:id/upload', requireLogin,async (req,res)=>{
+  let albumId = Number(req.params.id)
+  let album = await business.getAlbumById(albumId)
+  if(!album){
+    return res.render('error', {msg: 'Album not found.'})
+  }
+  res.render('upload',{ album })
+})
+
+app.post('/album/:id/upload', requireLogin, async (req, res) => {
+  let albumId = Number(req.params.id)
+
+  console.log('req.files =', req.files)
+
+  let uploaded = req.files && req.files.photo
+
+  if (!uploaded) {
+    return res.render('error', { msg: 'No file uploaded (photo field missing).' })
+  }
+
+  let timestamp = Date.now()
+  let safeName = timestamp + '_' + uploaded.name
+  let uploadPath = path.join(__dirname, 'public', 'photos', safeName)
+
+  uploaded.mv(uploadPath, async (err) => {
+    if (err) {
+      console.error('Upload mv error:', err)
+      return res.render('error', { msg: 'Upload failed.' })
+    }
+    await business.addPhoto({
+      filename: safeName,
+      ownerUsername: req.username,
+      visibility: "private",
+      title: "",
+      description: "",
+      tags: [],
+      albums: [albumId]
+    })
+    res.redirect('/album/' + albumId)
+  })
 })
 
 

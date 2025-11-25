@@ -21,7 +21,30 @@ async function loadPhotos() {
     return await persistence.loadPhotosData()
 }
 
+async function addPhoto(photoData) {
+  let photos = await loadPhotos()
 
+  let newId = 1
+  for(let i=0; i<photos.length;i++){
+    let p = photos[i]
+    if (typeof p.id === 'number' && p.id >=newId){
+      newId = p.id+1
+    }
+  }
+  let photo ={
+    id : newId,
+    filename: photoData.filename,
+    ownerUsername:photoData.ownerUsername,
+    title:"",
+    description:"",
+    visibility:"private",
+    tags:[],
+    albums:photoData.albums
+  }
+
+  await persistence.addPhoto(photo)
+  return photo
+}
 
 
 /**
@@ -320,6 +343,8 @@ async function addUser(username, password, firstName, lastName, email){
   return true
 }
 
+
+
 module.exports = {
     loadAlbum,
     loadPhotos,
@@ -336,5 +361,6 @@ module.exports = {
     canEditPhoto,
     albumPhotoListVisibleToUser,
     addComment,
-    getCommentsByPhoto
+    getCommentsByPhoto,
+    addPhoto
 }

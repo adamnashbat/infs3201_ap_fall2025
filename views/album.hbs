@@ -4,7 +4,7 @@
 <h1>Photos in {{album.name}} ({{count}} photo{{s}})</h1>
 
 <p>{{album.description}}</p>
-<div class="upload"><a href="/upload">Upload Photo</a></div>
+<div class="upload"><a href="/album/{{album.id}}/upload">Upload Photo</a></div>
 <div class="photo-grid">
   {{#each albumPhotos}}
     <div class="photo-item">
