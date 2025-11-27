@@ -20,7 +20,17 @@ async function loadAlbum() {
 async function loadPhotos() {
     return await persistence.loadPhotosData()
 }
-
+/**
+ * Adds a new photo record into persistence with a generated numeric ID
+ * and default metadata such as private visibility and empty title/description.
+ * @async
+ * @function
+ * @param {Object} photoData - Minimal data for the new photo.
+ * @param {string} photoData.filename - The stored filename of the photo.
+ * @param {string} photoData.ownerUsername - Username of the owner of the photo.
+ * @param {number[]} photoData.albums - Array of album IDs the photo belongs to.
+ * @returns {Promise<Object>} The newly created photo object.
+ */
 async function addPhoto(photoData) {
   let photos = await loadPhotos()
 
@@ -342,7 +352,13 @@ async function addUser(username, password, firstName, lastName, email){
   await persistence.saveUserData(users)
   return true
 }
-
+/**
+ * Retrieves a user object by username via persistence layer.
+ * @async
+ * @function
+ * @param {string} username - The username of the user to look up.
+ * @returns {Promise<Object|null>} The user object if found, otherwise null.
+ */
 async function getUserByUsername(username) {
   return await persistence.getUserDetails(username)
   

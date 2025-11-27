@@ -1,0 +1,44 @@
+<p>
+  <a href="/album-list">Back to Albums</a> |
+  <a href="/logout">Logout</a>
+</p>
+
+<div class="search-container">
+  <form action="/search" method="get">
+    <input 
+      type="text" 
+      name="idk" 
+      placeholder="Search photos by title, description, or tags..."
+      value="{{q}}"
+      class="search-input"
+    >
+    <button class="search-btn">Search</button>
+  </form>
+</div>
+
+<h1>Search Results</h1>
+
+{{#if q}}
+  <p>Results for: "{{q}}"</p>
+{{/if}}
+
+{{#if photos}}
+  <div class="photo-grid">
+    {{#each photos}}
+      <div class="photo-item">
+        <a href="/photo/{{id}}">
+          <img src="/photo/{{id}}/image" alt="{{title}}">
+        </a>
+        <p>
+          {{#if title}}
+            {{title}}
+          {{else}}
+            {{filename}}
+          {{/if}}
+        </p>
+      </div>
+    {{/each}}
+  </div>
+{{else}}
+  <p>No matching public photos found.</p>
+{{/if}}

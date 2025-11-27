@@ -1,12 +1,30 @@
+<p>
+  <a href="/album-list">Home</a> |
+  <a href="/logout">Logout</a>
+</p>
+
 {{#if message}}
-<div class="message">
+  <div class="message">
     {{ message }}
-</div>
+  </div>
 {{/if}}
-<h1>Photo Album</h1>       
+
+<div class="search-container">
+  <form action="/search" method="get">
+    <input 
+      type="text" 
+      name="idk" 
+      placeholder="Search photos by title, description, or tags..."
+      class="search-input"
+    >
+    <button class="search-btn">Search</button>
+  </form>
+</div>
+
+<h1>Photo Albums</h1>
+
 <ul>
   {{#each albums}}
     <li><a href="/album/{{id}}">{{name}}</a></li>
   {{/each}}
 </ul>
-<a href="/logout">Logout</a>

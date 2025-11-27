@@ -111,8 +111,6 @@ async function getUserDetails(username) {
 }
 
 
-
-
 /**
  * Updates a single photo document by its ID, returning the updated document.
  * @async
@@ -217,7 +215,13 @@ async function deleteSession(key) {
     }
 }
 
-
+/**
+ * Inserts a new photo document into the database.
+ * @async
+ * @function
+ * @param {Object} photo - The photo document to insert.
+ * @returns {Promise<boolean>} True when insertion is complete.
+ */
 async function addPhoto(photo) {
   await connectDatabase()
   await photoCollection.insertOne(photo)

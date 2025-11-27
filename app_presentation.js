@@ -200,7 +200,13 @@ app.get('/album/:id', requireLogin, async (req, res) => {
   res.render('album', { album, albumPhotos, count, s})
 })
 
-
+/**
+ * GET upload form for a specific album.
+ * Renders the photo upload page for the selected album.
+ * @async
+ * @param {import('express').Request} req - The Express request object.
+ * @param {import('express').Response} res - The Express response object.
+ */
 app.get('/album/:id/upload', requireLogin,async (req,res)=>{
   let albumId = Number(req.params.id)
   let album = await business.getAlbumById(albumId)
@@ -209,15 +215,19 @@ app.get('/album/:id/upload', requireLogin,async (req,res)=>{
   }
   res.render('upload',{ album })
 })
-
+/**
+ * POST upload a photo to the selected album.
+ * Handles file upload, saves the file on disk, and records metadata in the database.
+ * @async
+ * @param {import('express').Request} req - The request containing the uploaded file.
+ * @param {import('express').Response} res - The response object.
+ */
 app.post('/album/:id/upload', requireLogin, async (req, res) => {
   let albumId = Number(req.params.id)
   let description = req.body.description
   let title = req.body.title
   console.log(description)
   console.log(title)
-
-  console.log('req.files =', req.files)
 
   let uploaded = req.files && req.files.photo
 
@@ -246,8 +256,6 @@ app.post('/album/:id/upload', requireLogin, async (req, res) => {
     res.redirect('/album/' + albumId)
   })
 })
-
-
 /**
  * GET a specific photo.
  * Checks view permissions & loads comments.
@@ -270,8 +278,6 @@ app.get('/photo/:id', requireLogin, async (req, res) => {
   const comments = await business.getCommentsByPhoto(photoId)
   res.render('photo', { photo,canEdit, comments})
 })
-
-
 /**
  * POST add comment to photo.
  * Validates view permissions & comment text.
@@ -315,9 +321,6 @@ app.post('/photo/:id/comment', requireLogin, async(req,res)=>{
     message: 'comment added'
   })
 })
-
-
-
 /**
  * GET edit photo page.
  * @async
@@ -332,9 +335,6 @@ app.get('/edit', requireLogin, async (req, res) => {
   }
   res.render('photoEdit', { photo})
 })
-
-
-
 /**
  * POST update photo metadata (title, description, visibility).
  * @async
@@ -351,13 +351,46 @@ app.post('/edit', requireLogin, async (req, res) => {
   }
   res.redirect(`/photo/${photoId}`)
 })
+/**
+ * GET search results.
+ * Searches for public photos (or later extended visibility) using
+ * title, description, and tags fields.
+ * @async
+ * @param {import('express').Request} req - The Express request object containing search query.
+ * @param {import('express').Response} res - The Express response object.
+ */
+app.get('/search', requireLogin, async (req, res) => {
+  let rawQuery = req.query.idk || ""
+  let q = rawQuery.toLowerCase()
+  if (!q) {
+    return res.render('searchResults', { q: rawQuery, photos: [] })
+  }
+  let photos = await business.loadPhotos()
+  let results = []
+  for (let i = 0; i < photos.length; i++) {
+    let p = photos[i]
+    if (p.visibility !== 'public') {
+      continue
+    }
+    let title = (p.title || "").toLowerCase()
+    let desc = (p.description || "").toLowerCase()
 
-
-
+    let tagsText = ""
+    if (p.tags && Array.isArray(p.tags)) {
+      for (let j = 0; j < p.tags.length; j++) {
+        tagsText += " " + String(p.tags[j]).toLowerCase()
+      }
+    }
+    let combined = title + " " + desc + " " + tagsText
+    if (combined.indexOf(q) !== -1) {
+      results.push(p)
+    }
+  }
+  res.render('searchResults', { q: rawQuery, photos: results })
+})
 /**
  * Starts the Express server.
  */
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`)
 })
-

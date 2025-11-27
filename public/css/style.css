@@ -137,3 +137,66 @@ a:hover {
     transform: scale(1.05);
     border-color: #000000;
 }
+
+.upload button{
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #07691e;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    transition: 0.2s;
+    border: black 5px solid;
+
+}
+
+.upload button:hover{
+    background-color: #055816;
+    transform: scale(1.05);
+    border-color: #000000;
+}
+.search-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 30px 0 20px 0;
+}
+
+.search-container form {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    width: 450px;
+    padding: 12px 15px;
+    font-size: 18px;
+    border: 2px solid #1a2d70;
+    border-radius: 10px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.search-input:focus {
+    border-color: #4d6df3;
+    box-shadow: 0 0 8px rgba(77, 109, 243, 0.4);
+}
+
+.search-btn {
+    padding: 12px 20px;
+    background: #1a2d70;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.search-btn:hover {
+    background: #2e46a1;
+    transform: scale(1.05);
+}
