@@ -26,15 +26,15 @@ app.use(bodyParser.urlencoded())
  * @param {import('express').Response} res - The Express response object.
  */
 app.get('/photo/:id/image', requireLogin, async (req, res) => {
-    const photoId = Number(req.params.id)
-    const photo = await business.findPhoto(photoId)
+    let photoId = Number(req.params.id)
+    let photo = await business.findPhoto(photoId)
 
     if (!photo) {
         return res.render('error', { msg: 'Photo not found.' })
     }
 
 
-    const canView = await business.canViewPhoto(req.username, photo)
+    let canView = await business.canViewPhoto(req.username, photo)
     if (!canView) {
         return res.render('error', { msg: 'You do not have access to this photo.' })
     }
@@ -44,7 +44,6 @@ app.get('/photo/:id/image', requireLogin, async (req, res) => {
     res.sendFile(photoPath)
 })
 app.use('/css', express.static(path.join(__dirname, 'public/css')))
-let album
 
 
 /**
@@ -164,14 +163,6 @@ app.get('/logout', async (req, res) => {
  * @param {import('express').Response} res - The Express response object.
  */
 app.get('/album-list', requireLogin, async (req,res)=>{
-  let sessionKey = req.cookies.sessionkey
-  if (!sessionKey) {
-        return res.redirect("/?message=No session found. Please log in.")
-  }
-  const session = await business.getSessionData(sessionKey)
-  if (!session) {
-    return res.redirect("/?message=Session expired")
-  }
   let albums= await business.loadAlbum()
   res.render('albumList', {message:req.query.message, albums})
 })
@@ -185,8 +176,8 @@ app.get('/album-list', requireLogin, async (req,res)=>{
  * @param {import('express').Response} res - The Express response object.
  */
 app.get('/album/:id', requireLogin, async (req, res) => {
-  const albumId = Number(req.params.id)
-  const album = await business.getAlbumById(albumId)
+  let albumId = Number(req.params.id)
+  let album = await business.getAlbumById(albumId)
   if (!album) {
     return res.render('error', { msg: 'Album not found.' })
   }
@@ -257,15 +248,15 @@ app.post('/album/:id/upload', requireLogin, async (req, res) => {
  * Checks view permissions & loads comments.
  * @async
  * @param {import('express').Request} req - The Express request object.
- * @param {import('express').Response} res - The Express response object.
+ * @param {import('express').Response} letres - The Express response object.
  */
 app.get('/photo/:id', requireLogin, async (req, res) => {
-  const photoId = Number(req.params.id)
-  const photo = await business.findPhoto(photoId)
+  let photoId = Number(req.params.id)
+  let photo = await business.findPhoto(photoId)
   if (!photo) {
     return res.render('error', { msg: 'Photo not found.'})
   }
-  const canView = await business.canViewPhoto(req.username, photo)
+  let canView = await business.canViewPhoto(req.username, photo)
   if (!canView) {
     return res.render('error', { msg: 'You do not have access to this photo.'})
   }
