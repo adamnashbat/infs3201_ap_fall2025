@@ -45,8 +45,8 @@ async function addPhoto(photoData) {
     id : newId,
     filename: photoData.filename,
     ownerUsername:photoData.ownerUsername,
-    title:photoData.title,
-    description: photoData.description,
+    title:'',
+    description: '',
     visibility:"private",
     tags:[],
     albums:photoData.albums
