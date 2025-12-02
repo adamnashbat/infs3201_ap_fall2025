@@ -2,6 +2,12 @@
 <p>Title: {{photo.title}}</p>
 <p>Description: {{photo.description}}</p>
 <img src="/photo/{{photo.id}}/image" style="max-width: 300px;" alt="{{photo.title}}">
+{{#if photo.tags}}
+<br></ba><b>Tags:</b>
+{{#each photo.tags}}
+#{{this}}
+{{/each}}
+{{/if}}
 <h3>Comments</h3>
 {{#if comments}}
   <ul>
